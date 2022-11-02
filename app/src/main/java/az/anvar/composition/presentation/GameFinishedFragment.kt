@@ -5,10 +5,13 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import az.anvar.composition.R
 import az.anvar.composition.databinding.FragmentGameFinishedBinding
 import az.anvar.composition.domain.entity.GameResult
 
 class GameFinishedFragment : Fragment() {
+
+    private val TAG = "GameFinishedFragment_Anvar"
 
     private lateinit var gameResult: GameResult
 
@@ -31,6 +34,36 @@ class GameFinishedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupClickListeners()
+        bindViews()
+    }
+
+    private fun bindViews() {
+        setupEmoji()
+        binding.tvRequiredAnswers.text =
+            String.format(
+                getString(R.string.required_score),
+                gameResult.gameSettings.minCountOfRightAnswers
+            )
+        binding.tvScoreAnswers.text =
+            String.format(getString(R.string.score_answers), gameResult.countOfRightAnswers)
+        binding.tvRequiredPercentage.text = String.format(
+            getString(R.string.required_percentage),
+            gameResult.gameSettings.minPercentOfRightAnswers
+        )
+        binding.tvScorePercentage.text =
+            String.format(getString(R.string.score_percentage), getPercentOfRightAnswers())
+    }
+
+    private fun getPercentOfRightAnswers() = with(gameResult) {
+        if (countOfQuestions == 0) {
+            0
+        } else {
+            ((countOfRightAnswers / countOfQuestions.toDouble()) * 100).toInt()
+        }
+    }
+
+    private fun setupClickListeners() {
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -42,6 +75,15 @@ class GameFinishedFragment : Fragment() {
         binding.buttonRetry.setOnClickListener {
             retryGame()
         }
+    }
+
+    private fun setupEmoji() {
+        val drawableId = if (gameResult.winner) {
+            R.drawable.ic_smile
+        } else {
+            R.drawable.ic_sad
+        }
+        binding.emojiResult.setImageResource(drawableId)
     }
 
     override fun onDestroyView() {
