@@ -1,10 +1,18 @@
 package az.anvar.composition.presentation
 
+import android.content.Context
+import android.content.res.ColorStateList
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import az.anvar.composition.R
 import az.anvar.composition.domain.entity.GameResult
+
+interface OnOptionClickListener {
+    fun onOptionClick(option: Int)
+}
 
 @BindingAdapter("requiredAnswers")
 fun bindRequiredAnswers(textView: TextView, count: Int) {
@@ -40,5 +48,41 @@ fun bindEmojiSrc(imageView: ImageView, isWinner: Boolean) {
         R.drawable.ic_sad
     }
     imageView.setImageResource(drawableId)
+}
 
+@BindingAdapter("percentOfRightAnswers")
+fun bindPercentOfRightAnswers(progressBar: ProgressBar, progress: Int) {
+    progressBar.setProgress(progress, true)
+}
+
+@BindingAdapter("enoughRightAnswers")
+fun bindEnoughRightAnswers(textView: TextView, isGood: Boolean) {
+    textView.setTextColor(getColorByState(textView.context, isGood))
+}
+
+@BindingAdapter("enoughPercentOfRightAnswers")
+fun bindEnoughPercentOfRightAnswers(progressBar: ProgressBar, isGood: Boolean) {
+    val color = getColorByState(progressBar.context, isGood)
+    progressBar.progressTintList = ColorStateList.valueOf(color)
+}
+
+private fun getColorByState(context: Context, goodState: Boolean): Int {
+    val colorResId = if (goodState) {
+        android.R.color.holo_green_light
+    } else {
+        android.R.color.holo_red_light
+    }
+    return ContextCompat.getColor(context, colorResId)
+}
+
+@BindingAdapter("numberAsText")
+fun bindNumberAsText(textView: TextView, number: Int) {
+    textView.text = number.toString()
+}
+
+@BindingAdapter("onOptionClickListener")
+fun bindOnOptionClickListener(textView: TextView, clickListener: OnOptionClickListener) {
+    textView.setOnClickListener {
+        clickListener.onOptionClick(textView.text.toString().toInt())
+    }
 }
